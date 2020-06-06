@@ -228,8 +228,8 @@ const storedData = userInput ?? 'DEFAULT';
 
 console.log(storedData);
 
-                                      GENERICS - type connected somehow to another type
-                                              - FLEXIBLE AND REUSABLE CODE 
+                                     // GENERICS - type connected somehow to another type
+                                            //  - FLEXIBLE AND REUSABLE CODE 
 
 on an aray example: (array default type -> array is a type on its own).
 const name = [] <== inferred any 
@@ -267,16 +267,16 @@ function merge<T extends object, U extends object>(objA: T, objB: U) {
 
 const mergedObj = merge({ name: 'Max', hobbies: ['Sports'] }, { age: 30 });
 
-You do not need to specify types like this. TS infers types for properties. 
+//You do not need to specify types like this. TS infers types for properties. 
 const mergedObj = merge<{name:string, hobbies:string[]}, {age:number}}({ name: 'Max', hobbies: ['Sports'] }, { age: 30 });
 console.log(mergedObj);
 
-II. Alternative solution with type casting => this would be very cumbersome
+//II. Alternative solution with type casting => this would be very cumbersome
 
 const mergedObj = merge({ name: 'Max', hobbies: ['Sports'] }, { age: 30 }) as {name: string, age: number}
 
 
-- - - Working with Constraints - u use - extends - to add constraint 
+//- - - Working with Constraints - u use - extends - to add constraint 
 
 function merge<T extends object, U extends object>(objA: T, objB: U) {
   return Object.assign(objA, objB);
@@ -285,7 +285,7 @@ function merge<T extends object, U extends object>(objA: T, objB: U) {
 const mergedObj = merge({ name: 'Max', hobbies: ['Sports'] }, { age: 30 });
 console.log(mergedObj);
 
-Another example: 
+//Another example: 
 
 interface Lengthy {        <===for Ts it is not clear that property has a length 
   length: number;
@@ -305,6 +305,8 @@ function countAndDescribe<T extends Lengthy>(element: T): [T, string] {
 
 console.log(countAndDescribe(['Sports', 'Cooking']));
 
+//Example:3 gurantee that second parameter would be any key of first - ensure we will not access property that does not exist
+
 function extractAndConvert<T extends object, U extends keyof T>(
   obj: T,
   key: U
@@ -313,4 +315,55 @@ function extractAndConvert<T extends object, U extends keyof T>(
 }
 
 extractAndConvert({ name: 'Max' }, 'name');
+
+//- - - - Generic Classes - maybe i want to have different staorages  
+
+class DataStorage<T extends string | number | boolean> {
+  private data: T[] = [];
+
+  addItem(item: T) {
+    this.data.push(item);
+  }
+
+  removeItem(item: T) {
+    if (this.data.indexOf(item) === -1) {
+      return;
+    }
+    this.data.splice(this.data.indexOf(item), 1); // -1
+  }
+
+  getItems() {
+    return [...this.data];
+  }
+}
+
+const textStorage = new DataStorage<string>();
+textStorage.addItem('Max');
+textStorage.addItem('Manu');
+textStorage.removeItem('Max');
+console.log(textStorage.getItems());
+
+const numberStorage = new DataStorage<number>();
+
+// const objStorage = new DataStorage<object>();
+// const maxObj = {name: 'Max'};
+// objStorage.addItem(maxObj);
+// objStorage.addItem({name: 'Manu'});
+// // ...
+// objStorage.removeItem(maxObj);
+// console.log(objStorage.getItems());
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
