@@ -354,16 +354,192 @@ const numberStorage = new DataStorage<number>();
 // console.log(objStorage.getItems());
 
 
+//- - - Generic Utility Types -
+//TypeScript provides several utility types to facilitate common type transformations. These utilities are available globally.
+
+// Table of contents #
+// Partial<T>
+// Readonly<T>
+// Record<K,T>
+// Pick<T,K>
+// Omit<T,K>
+// Exclude<T,U>
+// Extract<T,U>
+// NonNullable<T>
+// Parameters<T>
+// ConstructorParameters<T>
+// ReturnType<T>
+// InstanceType<T>
+// Required<T>
+// ThisParameterType
+// OmitThisParameter
+// ThisType<T>
+
+Partial<T> #
+
+//Constructs a type with all properties of T set to optional. This utility will return a type that represents all subsets of a given type.
+
+//Example #
+interface Todo {
+    title: string;
+    description: string;
+}
+
+function updateTodo(todo: Todo, fieldsToUpdate: Partial<Todo>) {
+    return { ...todo, ...fieldsToUpdate };
+}
+
+const todo1 = {
+    title: 'organize desk',
+    description: 'clear clutter',
+};
+
+const todo2 = updateTodo(todo1, {
+    description: 'throw out trash',
+});
+
+//Example 2
+
+interface CourseGoal {
+  title: string;
+  description: string;
+  completeUntil: Date;
+}
+
+function createCourseGoal(
+  title: string,
+  description: string,
+  date: Date
+): CourseGoal {
+  let courseGoal: Partial<CourseGoal> = {}; <=============c- at the end it will be  CourseGoal
+  courseGoal.title = title;
+  courseGoal.description = description;
+  courseGoal.completeUntil = date;
+  return courseGoal as CourseGoal;   <============= use typecasting 
+
+const names: Readonly<string[]> = ['Max', 'Anna'];
+// names.push('Manu');
+// names.pop();
+
+
+!!! - - - - - - - - - - - - -Difference between using utility types and generic: 
+    
+
+
+class DataStorage<T extends string | number | boolean> {       <==== with generic types you only choose once which type you are using and then u have to stick to it. To this
+                                                                      exact type of data. generics type are great when u want to lock certain types and use the same type through 
+                                                                      the whole instance. Generic type - lock in a type. 
+                                                                
+  private data: T[] = [];
+
+  addItem(item: T) {
+    this.data.push(item);
+  }
+
+  removeItem(item: T) {
+    if (this.data.indexOf(item) === -1) {
+      return;
+    }
+    this.data.splice(this.data.indexOf(item), 1); // -1
+  }
+
+  getItems() {
+    return [...this.data];
+  }
+  
+  
+class DataStorage {                                        <====string | number | boolean.  -! this only says the array can be of a mixed type. 
+                                                                 Whenever you call a function u can use any of this 
+  private data: string[]| number[] boolean[] = []           string | number | boolean = [] (would mean array of a mixed types)
+
+  addItem(item: string | number | boolean ) {
+    this.data.push(item);
+  }
+
+  removeItem(item: T) {
+    if (this.data.indexOf(item) === -1) {
+      return;
+    }
+    this.data.splice(this.data.indexOf(item), 1); // -1
+  }
+
+  getItems() {
+    return [...this.data];
+  }
+
+
+                                                  Decorators: Module Introduction 
+                                                    
+//important for meta programming, weel suited for writing code for other developers
+                                                  
+// decorators execute bottom up                                                  
+
+//Unlike like with eventlisteners, we gurantee with decorators that 
+//It is a function that applay a function 
+    
+//tweak your tsconfig:  
+    
+{
+    "compilerOptions": {
+        "target": "ES5",
+        "experimentalDecorators": true
+    }
+}
+
+ //Decorators provide a way to add both annotations and a meta-programming syntax for class declarations and members. 
+ 
+ function Logger(logString: string) {
+  return function(constructor: Function) {      <=== //returning anonymous function that return a new function. If defined like this, u need to add () 
+    console.log(logString);                       
+                                                      - //u can customize and pass in value that will be used - our custom string. it gives us a hint what a decorator does. 
+                                                        - @Logger('LOGGING - PERSON')  
+    console.log(constructor);
+  };
+}
+       or 
+    
+    function Logger(constructor: Function)  {               - @Logger  
+    console.log(logString);
+    console.log(constructor);
+  };
+}
+
+
+@Logger('LOGGING - PERSON')         <================ @ special sign, decorator run when definition exists not when initiated -!!!
+class Person {
+  name = 'Max';
+
+  constructor() {
+    console.log('Creating person object...');
+  }
+}
+
+const pers = new Person();
+
+console.log(pers);
 
 
 
+function WithTemplate(template: string, hookId: string) {
+  return function(constructor: any) {
+    const hookEl = document.getElementById(hookId);    <===reach to hook element. If exists - used this inner text. render sth for the class. 
+    const p = new constructor();
+    if (hookEl) {
+      hookEl.innerHTML = template;
+      hookEl.querySelector('h1')!.textContent = p.name;
+    }
+  }
+}
 
+// @Logger('LOGGING - PERSON')
+@WithTemplate('<h1>My Person Object</h1>', 'app')        < === this would be rendered on the page. 
+class Person {
+  name = 'Max';
 
-
-
-
-
-
+  constructor() {
+    console.log('Creating person object...');
+  }
+}
 
 
 
