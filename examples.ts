@@ -542,4 +542,41 @@ class Person {
 }
 
 
+----------------------------------------------------------------------------------------------------------------------------
+BINDING - HANDING FORM SUBMITS
+
+function autobind(_: any, _2: string, descriptor: PropertyDescriptor) {
+  const originalMethod = descriptor.value;
+  const adjDescriptor: PropertyDescriptor = {
+    configurable: true,
+    get() {
+      const boundFn = originalMethod.bind(this);
+      return boundFn;
+    },
+  };
+  return adjDescriptor;
+}
+
+
+  @autobind
+  private submitHandler(event: Event) {
+    event.preventDefault();
+
+    const userInput = this.gatherUserInput();
+    console.log(userInput, 'userInpout');
+    if (Array.isArray(userInput)) {
+      const [title, desc, people] = userInput;
+      console.log(title, desc, people);
+    }
+  }
+  // checking tuple
+
+  private configure() {
+    this.element.addEventListener('submit', this.submitHandler); // add bind to have proper context of this
+    // this.element.addEventListener('submit', this.submitHandler.bind(this)); // add bind to have proper context of this
+  }
+
+
+
+
 
