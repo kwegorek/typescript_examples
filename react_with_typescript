@@ -1,8 +1,48 @@
+TYPESCRIPT AND REACT 
+_________________________________________________________
 1. Use create-react-app 
 
 https://create-react-app.dev/docs/adding-typescript/
 
 create-react-app
+
+2. Run npm start to run development server
+
+_________________________________________________________
+ TO DO LIST IN REACT WITH TS 
+ 
+ 1. Creacte component TodoList 
+ 
+ - describe types for props with interface/ get props from higher component 
+ - use React.FC to describe its react function 
+ 
+ import React from "react";
+
+interface TodoListProps {
+  items: { id: string; text: string }[];
+}
+
+const TodoList: React.FC<TodoListProps> = (props) => {                <===== Ract.FC is a generic type, alternatively u can use  
+                                                                                                 React.FC<{items: { id: string; text: string }[]/>
+
+  return (
+    <ul>
+      {props.items.map((todo) => (
+        <li key={todo.id}>{todo.text}</li>
+      ))}
+    </ul>
+  );
+};
+
+export default TodoList;
+
+2. 
+
+
+
+
+
+_________________________________________________________
 
 GLOSSARY 
 
