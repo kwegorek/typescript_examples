@@ -9,13 +9,18 @@ create-react-app
 2. Run npm start to run development server
 
 _________________________________________________________
+
+
  TO DO LIST IN REACT WITH TS 
  
- 1. Creacte component TodoList 
+ #1-4 TODOLSIT 
+ 
+ 1. Create component TodoList 
  
  - describe types for props with interface/ get props from higher component 
  - use React.FC to describe its react function 
- 
+
+**************** 
  import React from "react";
 
 interface TodoListProps {
@@ -35,15 +40,343 @@ const TodoList: React.FC<TodoListProps> = (props) => {                <===== Rac
 };
 
 export default TodoList;
+****************
 
-2. 
+2. Managing state with TS and React 
 
+****************
+import React, {useState} from 'react';
+import logo from './logo.svg';
+import TodoList from './components/TodoList'
+import NewToDo from './components/NewToDo'
+import './App.css';
+import {Todo} from './todo.models'
+
+function App() {
+  const [todoes, settodoes] = useState<Todo[]>([])
+
+  // const todos = [{id:'1', text:'Go shopping'}, {id:'2', text:'Go to a doctor'}]
+  
+  const todoAddHandler = (text:string) => {
+    console.log(text)
+    settodoes(prevTodos => [...prevTodos, {id:Math.random().toString(), text:text}])
+
+  }
+  //managing state eith TS
+
+  return (
+    <div className="App">
+      <NewToDo onAddTodo={todoAddHandler}/>
+      <TodoList items={todoes}/>
+    </div>
+  );
+}
+
+export default App;
+
+//when using ts with react be clar about types 
+// if u realy on props set type 
+//#4 Managing state with useState 
+
+****************
+
+
+****************
+import React, {useRef} from "react";
+
+
+// interface NewToDoProps {
+//     onAddToDo:{ id: string; text: string }[];
+// } 
+
+// set up a type definition 
+
+type NewToDoProps = {
+    onAddTodo: (todoText: string) => void  //fn that does not return anything
+}
+
+const NewToDo: React.FC<NewToDoProps> = props => {
+
+    const userInputRef = useRef<HTMLInputElement>(null)
+
+    //when dealing with TS, think what interesting can be stored in that function 
+
+    const todoSubmitHandler = (event: React.FormEvent) => {
+        event.preventDefault()
+        const enteredText = userInputRef.current!.value //again we are accesing DOM element - Ts does not know if it exists. TS does not know we established a connection ref={userInputRef}
+        
+        props.onAddTodo(enteredText);
+    
+    
+    
+    }
+ //add exclamation mark to tell it will be ok. If you cant make sure element will be rendered, use check in a if statement 
+
+  return (
+    <form onSubmit={todoSubmitHandler}>
+        <div>
+            <label htmlFor="todo-text">Todotext</label>
+            <input type='text' id='todo-text' ref={userInputRef}/>
+        </div>
+        <button type='submit'>ADD TODO</button>
+    </form>
+  );
+};
+
+export default NewToDo;
+****************
+//Tasks
+//1. Forward what user types 
+// create submit handler - point to a handler 
+//2. Getting user input 
+//Manage state with two way binding 
+//use ref - u can assign ref to a DOM element and to use it set a connection by passing a prop on an input
+
+
+
+_________________________________________________________
+#5 DELETEING ITEM 
+
+****************
+import React, {useState} from 'react';
+import logo from './logo.svg';
+import TodoList from './components/TodoList'
+import NewToDo from './components/NewToDo'
+import './App.css';
+import {Todo} from './todo.models'
+function App() {
+  const [todoes, settodoes] = useState<Todo[]>([])
+  // const todos = [{id:'1', text:'Go shopping'}, {id:'2', text:'Go to a doctor'}]
+  const todoAddHandler = (text:string) => {
+    console.log(text)
+    settodoes(prevTodos => [...prevTodos, {id:Math.random().toString(), text:text}])
+  }
+  //managing state eith TS
+  const todoDeleteHandler = (todoId:string) => {
+    //call settodoes and return new array filtered -> return new array - filtered item 
+    settodoes(prevTodos => {return prevTodos.filter(todo => todo.id !== todoId)})
+  }
+  return (
+    <div className="App">
+      <NewToDo onAddTodo={todoAddHandler}/>
+      <TodoList items={todoes} onDeleteTodo ={todoDeleteHandler}/>
+    </div>
+  );
+}
+
+****************
+______________________
+
+****************
+export default App;
+//when using ts with react be clar about types 
+// if u realy on props set type 
+//#4 Managing state with useState 
+
+import React from "react";
+
+interface TodoListProps {
+  items: { id: string; text: string }[];
+  onDeleteTodo: (id:string) => void
+}
+
+const TodoList: React.FC<TodoListProps> = (props) => {
+  return (
+    <ul>
+      {props.items.map((todo) => (
+        <li key={todo.id}>
+          {" "}
+          <span>{todo.text}</span> 
+          <button onClick={props.onDeleteTodo.bind(null, todo.id)}>DELETE</button>{" "}
+        </li>
+      ))}
+    </ul>
+  );
+};
+
+export default TodoList;
+****************
+__________________________________________________
+React TS Redux and react Router 
+
+npm install --save react-routere-dom /adding support for something 
+=> if dep is not supported -> add it like this 
+npm install --savee-dev @types/react-route
+
+_________________________________________________________
+WRAP UP 
+
+_________________________________________________________
+NODEJS EXPRESS with TS 
+
+1.Compile file to tsc - then exeecute it with TS (TS node tool) 
+
+npm install @types/express
+
+2. npm init 
+3. tsc --init
+4.otdir/resolutionmodule
+5. npm install --save express body-parser 
+6. src 
+7. tsc -w watchomode (Typescript compilation)
+8. start": "nodemon dist/app.js" - development server 
+
+
+***
+// import {Request, Response, NextFunction} from 'express'; 
+import {RequestHandler} from 'express'
+import {Todo} from '../models/todo'
+//class works as a type
+const TODOS: Todo[] = []; 
+export const createTodo: RequestHandler = (req, res, next) => {
+    const text = (req.body as {text: string}).text; //use typecasting if u know type of incoming input 
+    console.log(req.body, 'req.body')
+    const newTodo = new Todo(Math.random().toString(), text )
+    TODOS.push(newTodo)
+    res.status(201).json({message:'created new todo', newToDo: newTodo})
+}
+export const getTodos: RequestHandler = (req, res, next) => {
+    res.status(200).json({allTodos:TODOS})
+}
+export const updateTodos: RequestHandler <(id:string)> = (req, res, next) => {
+   const todoId = req.params.id; 
+   const updatedText = (req.body as {text: string}).text;
+   const todoIndex = TODOS.findIndex(todo => todo.id === todoId)
+   if(todoIndex < 0){
+       throw new Error('Could not find id')
+   }
+   TODOS[todoIndex] = new Todo(TODOS[todoIndex].id,updatedText ); 
+   res.json({message:'Wpdated', updatedTodo: TODOS[todoIndex]})
+}
+export const deleteTodos: RequestHandler <(id: string)> = (req, res, next) => {
+    const todoId = req.params.id; 
+    const todoIndex = TODOS.findIndex(todo => todo.id === todoId)
+    if(todoIndex < 0){
+        throw new Error('Could not find id')
+    }
+   TODOS.splice(todoIndex,1)
+ }
+ 
+***
+import { Router } from 'express';
+
+import { createTodo, getTodos, updateTodos, deleteTodos } from '../controllers/todos';
+
+const router = Router();
+
+router.post('/', createTodo);
+
+router.get('/', getTodos);
+
+router.patch('/:id');
+
+router.delete('/:id');
+
+export default router;
+
+***
+export class Todo {
+    constructor(public id: string, public text:string) {
+
+    }
+}
+***
+import express from 'express'
+import { json } from 'body-parser';
+import  todoRoutes from './routes/todos' //connect routes 
+
+const app = express(); 
+
+//connect to running app
+
+
+app.use(json()); //populates parsed body
+app.use('/todos', todoRoutes); 
+
+app.use((err: Error, req: express.Request, res: express.Response, next:express.NextFunction) => {
+
+    res.status(500).json({message:err.message})
+
+}); 
+
+app.listen(3000)
+
+***
+{
+  "compilerOptions": {
+    /* Visit https://aka.ms/tsconfig.json to read more about this file */
+
+    /* Basic Options */
+    // "incremental": true,                   /* Enable incremental compilation */
+    "target": "es5",                          /* Specify ECMAScript target version: 'ES3' (default), 'ES5', 'ES2015', 'ES2016', 'ES2017', 'ES2018', 'ES2019', 'ES2020', or 'ESNEXT'. */
+    "module": "commonjs",  
+    "moduleResolution":"node",                   /* Specify module code generation: 'none', 'commonjs', 'amd', 'system', 'umd', 'es2015', 'es2020', or 'ESNext'. */
+    // "lib": [],                             /* Specify library files to be included in the compilation. */
+    // "allowJs": true,                       /* Allow javascript files to be compiled. */
+    // "checkJs": true,                       /* Report errors in .js files. */
+    // "jsx": "preserve",                     /* Specify JSX code generation: 'preserve', 'react-native', or 'react'. */
+    // "declaration": true,                   /* Generates corresponding '.d.ts' file. */
+    // "declarationMap": true,                /* Generates a sourcemap for each corresponding '.d.ts' file. */
+    // "sourceMap": true,                     /* Generates corresponding '.map' file. */
+    // "outFile": "./",                       /* Concatenate and emit output to single file. */
+    "outDir": "./dist",                        /* Redirect output structure to the directory. */
+    "rootDir": "./src",                       /* Specify the root directory of input files. Use to control the output directory structure with --outDir. */
+    // "composite": true,                     /* Enable project compilation */
+    // "tsBuildInfoFile": "./",               /* Specify file to store incremental compilation information */
+    // "removeComments": true,                /* Do not emit comments to output. */
+    // "noEmit": true,                        /* Do not emit outputs. */
+    // "importHelpers": true,                 /* Import emit helpers from 'tslib'. */
+    // "downlevelIteration": true,            /* Provide full support for iterables in 'for-of', spread, and destructuring when targeting 'ES5' or 'ES3'. */
+    // "isolatedModules": true,               /* Transpile each file as a separate module (similar to 'ts.transpileModule'). */
+
+    /* Strict Type-Checking Options */
+    "strict": true,                           /* Enable all strict type-checking options. */
+    // "noImplicitAny": true,                 /* Raise error on expressions and declarations with an implied 'any' type. */
+    // "strictNullChecks": true,              /* Enable strict null checks. */
+    // "strictFunctionTypes": true,           /* Enable strict checking of function types. */
+    // "strictBindCallApply": true,           /* Enable strict 'bind', 'call', and 'apply' methods on functions. */
+    // "strictPropertyInitialization": true,  /* Enable strict checking of property initialization in classes. */
+    // "noImplicitThis": true,                /* Raise error on 'this' expressions with an implied 'any' type. */
+    // "alwaysStrict": true,                  /* Parse in strict mode and emit "use strict" for each source file. */
+
+    /* Additional Checks */
+    // "noUnusedLocals": true,                /* Report errors on unused locals. */
+    // "noUnusedParameters": true,            /* Report errors on unused parameters. */
+    // "noImplicitReturns": true,             /* Report error when not all code paths in function return a value. */
+    // "noFallthroughCasesInSwitch": true,    /* Report errors for fallthrough cases in switch statement. */
+
+    /* Module Resolution Options */
+    // "moduleResolution": "node",            /* Specify module resolution strategy: 'node' (Node.js) or 'classic' (TypeScript pre-1.6). */
+    // "baseUrl": "./",                       /* Base directory to resolve non-absolute module names. */
+    // "paths": {},                           /* A series of entries which re-map imports to lookup locations relative to the 'baseUrl'. */
+    // "rootDirs": [],                        /* List of root folders whose combined content represents the structure of the project at runtime. */
+    // "typeRoots": [],                       /* List of folders to include type definitions from. */
+    // "types": [],                           /* Type declaration files to be included in compilation. */
+    // "allowSyntheticDefaultImports": true,  /* Allow default imports from modules with no default export. This does not affect code emit, just typechecking. */
+    "esModuleInterop": true,                  /* Enables emit interoperability between CommonJS and ES Modules via creation of namespace objects for all imports. Implies 'allowSyntheticDefaultImports'. */
+    // "preserveSymlinks": true,              /* Do not resolve the real path of symlinks. */
+    // "allowUmdGlobalAccess": true,          /* Allow accessing UMD globals from modules. */
+
+    /* Source Map Options */
+    // "sourceRoot": "",                      /* Specify the location where debugger should locate TypeScript files instead of source locations. */
+    // "mapRoot": "",                         /* Specify the location where debugger should locate map files instead of generated locations. */
+    // "inlineSourceMap": true,               /* Emit a single file with source maps instead of having a separate file. */
+    // "inlineSources": true,                 /* Emit the source alongside the sourcemaps within a single file; requires '--inlineSourceMap' or '--sourceMap' to be set. */
+
+    /* Experimental Options */
+    // "experimentalDecorators": true,        /* Enables experimental support for ES7 decorators. */
+    // "emitDecoratorMetadata": true,         /* Enables experimental support for emitting type metadata for decorators. */
+
+    /* Advanced Options */
+    "skipLibCheck": true,                     /* Skip type checking of declaration files. */
+    "forceConsistentCasingInFileNames": true  /* Disallow inconsistently-cased references to the same file. */
+  }
+}
 
 
 
 
 _________________________________________________________
-
 GLOSSARY 
 
 .tsx - extension for react-ts files 
